@@ -1,4 +1,4 @@
-require('dotenv').config(); // .env ෆයිල් එක රීඩ් කරන්න
+require('dotenv').config(); 
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { initializeApp } = require('firebase/app');
@@ -6,10 +6,10 @@ const { getDatabase, ref, push, set } = require('firebase/database');
 const path = require('path');
 const Groq = require('groq-sdk');
 
-// 1. Groq Setup (API Key එක දැන් එන්නේ .env ෆයිල් එකෙන්)
+// 1. Groq Setup
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// 2. Firebase Configuration (.env ෆයිල් එකෙන්)
+// 2. Firebase Configuration
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -24,9 +24,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 3. WhatsApp Client Setup
+// 3. WhatsApp Client Setup - Sandbox FIX HERE
 const client = new Client({
     authStrategy: new LocalAuth(),
+    puppeteer: {
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    }
 });
 
 client.on('qr', (qr) => {
@@ -94,7 +98,7 @@ client.on('message', async msg => {
             chatHistories[sender] = [
                 { role: "system", content: "You are a friendly and helpful AI assistant representing AKIYA OFFICIAL and DARK SOUL EMPIRE. You speak both Sinhala and English fluently. Keep your answers short and concise." }
             ];
-            await client.sendMessage(sender, `🤖 *AI Assistant*\n\nඔබට අවශ්‍ය ඕනෑම දෙයක් මාගෙන් අසන්න. මම උදව් කරන්නම්!\n\n_(ප්‍රධාන මෙනුවට යාමට 'Menu' ලෙස හෝ ඉවත් වීමට '00' යවන්න)_`);
+            await client.sendMessage(sender, `🤖 *AI Assistant*\n\nඔබට අවශ්‍ය ඕනෑම දෙයක් මාගෙන් අසන්න. මම උදව් කරන්නම්!\n\n_(ප්‍රධාන මෙනුවට 'Menu' ලෙස හෝ ඉවත් වීමට '00' යවන්න)_`);
         }
         else {
             await client.sendMessage(sender, `කරුණාකර නිවැරදි අංකයක් තෝරන්න (1, 2, හෝ 3). නැතහොත් ඉවත් වීමට '00' යවන්න.`);
