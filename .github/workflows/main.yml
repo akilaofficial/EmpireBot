@@ -1,0 +1,23 @@
+name: WhatsApp Bot
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Bot
+        env:
+          FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
+        run: node index.js
