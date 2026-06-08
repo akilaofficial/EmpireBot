@@ -1,9 +1,10 @@
 {
   "name": "empirebot",
   "version": "1.0.0",
-  "description": "",
+  "description": "WhatsApp Bot for Akiya Official & Dark Soul Empire",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,6 +13,7 @@
   "type": "commonjs",
   "dependencies": {
     "dotenv": "^17.4.2",
+    "express": "^4.18.2",
     "firebase": "^12.14.0",
     "groq-sdk": "^1.2.1",
     "qrcode-terminal": "^0.12.0",
