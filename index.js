@@ -1,7 +1,6 @@
 require('dotenv').config(); 
 const express = require('express'); 
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
 const { initializeApp } = require('firebase/app');
 const { getDatabase, ref, push, set } = require('firebase/database');
 const path = require('path');
@@ -52,9 +51,26 @@ const client = new Client({
     }
 });
 
-client.on('qr', (qr) => {
-    qrcode.generate(qr, { small: true });
-    console.log('ඔයාගේ WhatsApp එකෙන් මේ QR Code එක Scan කරන්න!');
+// --- Number එකෙන් Link කරන (Pairing Code) කොටස ---
+let pairingCodeRequested = false;
+
+client.on('qr', async (qr) => {
+    if (!pairingCodeRequested) {
+        try {
+            // 🔴 වැදගත්: මෙතන ඔයාගේ WhatsApp Business නම්බර් එක හරියටම දාන්න (උදා: '94771234567') 🔴
+            const phoneNumber = '947XXXXXXXX'; 
+            
+            const pairingCode = await client.requestPairingCode(phoneNumber);
+            console.log('\n=========================================');
+            console.log('📱 මෙන්න ඔයාගේ Pairing Code එක: ', pairingCode);
+            console.log('මේ කෝඩ් එක ඔයාගේ ෆෝන් එකේ WhatsApp එකට දෙන්න!');
+            console.log('=========================================\n');
+            
+            pairingCodeRequested = true;
+        } catch (error) {
+            console.log('⚠️ Pairing Code එක ගන්න බැරි වුණා:', error);
+        }
+    }
 });
 
 client.on('ready', () => {
