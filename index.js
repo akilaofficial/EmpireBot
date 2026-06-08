@@ -58,7 +58,7 @@ client.on('qr', async (qr) => {
     if (!pairingCodeRequested) {
         try {
             // 🔴 වැදගත්: මෙතන ඔයාගේ WhatsApp Business නම්බර් එක හරියටම දාන්න (උදා: '94771234567') 🔴
-            const phoneNumber = '947XXXXXXXX'; 
+            const phoneNumber = '94767973534'; 
             
             const pairingCode = await client.requestPairingCode(phoneNumber);
             console.log('\n=========================================');
