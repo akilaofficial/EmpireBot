@@ -1,10 +1,19 @@
 require('dotenv').config(); 
+const express = require('express'); // Hugging Face එකට අලුතින් එකතු කළා
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { initializeApp } = require('firebase/app');
 const { getDatabase, ref, push, set } = require('firebase/database');
 const path = require('path');
 const Groq = require('groq-sdk');
+
+// --- Hugging Face Keep-Alive Server ---
+const expressApp = express();
+const port = process.env.PORT || 7860;
+
+expressApp.get('/', (req, res) => res.send('🚀 EmpireBot is Successfully Running on Hugging Face!'));
+expressApp.listen(port, () => console.log(`🌐 Web Server is listening on port ${port}`));
+// --------------------------------------
 
 // 1. Groq Setup
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -21,10 +30,10 @@ const firebaseConfig = {
   measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const firebaseApp = initializeApp(firebaseConfig); // නම වෙනස් කළා conflict නොවෙන්න
+const db = getDatabase(firebaseApp);
 
-// 3. WhatsApp Client Setup - Sandbox FIX HERE
+// 3. WhatsApp Client Setup - Sandbox FIX
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
