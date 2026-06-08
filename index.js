@@ -1,5 +1,5 @@
 require('dotenv').config(); 
-const express = require('express'); // Hugging Face එකට අලුතින් එකතු කළා
+const express = require('express'); 
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { initializeApp } = require('firebase/app');
@@ -30,15 +30,25 @@ const firebaseConfig = {
   measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
-const firebaseApp = initializeApp(firebaseConfig); // නම වෙනස් කළා conflict නොවෙන්න
+const firebaseApp = initializeApp(firebaseConfig); 
 const db = getDatabase(firebaseApp);
 
-// 3. WhatsApp Client Setup - Sandbox FIX
+// 3. WhatsApp Client Setup - Sandbox FIX & Timeout FIX
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',      
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'                 
+        ],
+        timeout: 0 
     }
 });
 
