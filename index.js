@@ -22,15 +22,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// 💡 අලුත්ම Client එක: Business App QR ප්‍රශ්නය විසඳීමට අලුත් Session එකක් සෑදීම
 const client = new Client({
-    authStrategy: new LocalAuth(),
+    authStrategy: new LocalAuth({ clientId: 'akiya-business-session-1' }), 
     puppeteer: {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    },
-    webVersionCache: {
-        type: 'remote',
-        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage', 
+            '--disable-gpu'
+        ]
     }
 });
 
@@ -86,7 +88,7 @@ client.on('message', async msg => {
         return;
     }
 
-    // 🟢 MAIN MENU (අලුතින් ලස්සන කරපු එක)
+    // 🟢 MAIN MENU 
     if (text === 'hi' || text === 'hello' || text === 'menu') {
         userStates[sender] = 'MAIN_MENU';
         await chat.sendStateTyping();
