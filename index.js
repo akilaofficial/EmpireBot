@@ -22,7 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 💡 අලුත්ම Client එක: Business App QR ප්‍රශ්නය විසඳීමට අලුත් Session එකක් සෑදීම
+// 💡 Business App QR ප්‍රශ්නය සහ Session අවුල් හැඬල් කිරීමට හදපු Client එක
 const client = new Client({
     authStrategy: new LocalAuth({ clientId: 'akiya-business-session-1' }), 
     puppeteer: {
@@ -55,7 +55,7 @@ client.on('ready', () => {
 const userStates = {};
 const chatHistories = {};
 
-// 🧠 ADVANCED AI SYSTEM PROMPT 
+// 🧠 ADVANCED AI SYSTEM PROMPT (බොට්ගේ මොළය)
 const SYSTEM_PROMPT = `You are an elite, highly intelligent AI assistant named "AKIYA × DSE AI". 
 You represent two premium brands: "AKIYA OFFICIAL" and "DARK SOUL EMPIRE (DSE)".
 Founder & Owner: AKHILA SANDARUWAN.
@@ -88,7 +88,7 @@ client.on('message', async msg => {
         return;
     }
 
-    // 🟢 MAIN MENU 
+    // 🟢 MAIN MENU
     if (text === 'hi' || text === 'hello' || text === 'menu') {
         userStates[sender] = 'MAIN_MENU';
         await chat.sendStateTyping();
@@ -121,15 +121,15 @@ client.on('message', async msg => {
         return;
     }
 
-    // 🤖 AI CHAT (Google Gemma 2)
+    // 🤖 AI CHAT (Llama 3.3 70B - සුපිරිම මොඩල් එක)
     if (userStates[sender] === 'AI_CHAT') {
         try {
             await chat.sendStateTyping(); 
             chatHistories[sender].push({ role: "user", content: msg.body });
             const completion = await groq.chat.completions.create({
                 messages: chatHistories[sender],
-                model: "gemma2-9b-it", 
-                temperature: 0.2 
+                model: "llama-3.3-70b-versatile", // 👈 Groq එකේ තියෙන හොඳම මොඩල් එක
+                temperature: 0.2 // 👈 පිස්සු කියවන්නේ නැති වෙන්න පාලනය කර ඇත
             });
             const aiResponse = completion.choices[0]?.message?.content || "සමාවන්න, මට එය තේරුම් ගත නොහැක.";
             chatHistories[sender].push({ role: "assistant", content: aiResponse });
@@ -156,7 +156,7 @@ client.on('message', async msg => {
             case '9': responseText = `🔹 *CV Creation*\n✔ Modern ATS-friendly designs 📄\n✔ Professional corporate formatting`; imageName = '09.jpeg'; break;
             default: await chat.sendStateTyping(); await client.sendMessage(sender, `⚠️ *කරුණාකර 1️⃣ සිට 9️⃣ දක්වා නිවැරදි අංකයක් පමණක් තෝරන්න.*`); return;
         }
-        responseText += `\n\n📌 *මෙම සේවාව ලබාගැනීමට අවශ්‍යද?*\nකරුණාකර ඔබගේ අවශ්‍යතාවය පැහැදිලි කර මෙහි ටයිප් කරන්න. අපගේ කණ්ඩායම හැකි ඉක්මනින් ඔබව සම්බන්ධ කරගනු ඇත.\n\n_(ප්‍රධාන මෙනුවට *'Menu'* / ඉවත් වීමට *'00'* යවන්න)_`;
+        responseText += `\n\n📌 *මෙම සේවාව ලබාගැනීමට අවශ්‍යද?*\nකරුණාකර ඔබගේ ArrayList එක පැහැදිලි කර මෙහි ටයිප් කරන්න. අපගේ කණ්ඩායම හැකි ඉක්මනින් ඔබව සම්බන්ධ කරගනු ඇත.\n\n_(ප්‍රධාන මෙනුවට *'Menu'* / ඉවත් වීමට *'00'* යවන්න)_`;
         
         await chat.sendStateTyping();
         try {
@@ -188,7 +188,6 @@ client.on('message', async msg => {
         return;
     }
 
-    // Capture random messages to Firebase
     saveInquiryToFirebase(sender, msg.body);
 });
 
