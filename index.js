@@ -22,16 +22,22 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// 💡 අලුත්ම වෙනස: webVersionCache එකතු කරලා තියෙන්නේ Business App එකේ QR ප්‍රශ්නේ විසඳන්න
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
+    },
+    webVersionCache: {
+        type: 'remote',
+        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
     }
 });
 
 client.on('qr', (qr) => {
     qrcode.generate(qr, { small: true });
+    console.log('ඔයාගේ WhatsApp Business එකෙන් මේ අලුත් QR Code එක Scan කරන්න!');
 });
 
 client.on('ready', () => {
