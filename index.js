@@ -5,6 +5,20 @@ const { initializeApp } = require('firebase/app');
 const { getDatabase, ref, push, set } = require('firebase/database');
 const path = require('path');
 const Groq = require('groq-sdk');
+const express = require('express'); // 💡 Hugging Face එකට ඕන Web Server එක
+
+// --- 🌐 HUGGING FACE WEB SERVER SETUP ---
+const app_web = express();
+const port = process.env.PORT || 7860;
+
+app_web.get('/', (req, res) => {
+    res.send('✅ AKIYA × DSE Premium AI Bot is Running Successfully on Hugging Face!');
+});
+
+app_web.listen(port, () => {
+    console.log(`🌐 Web Server is listening on port ${port}`);
+});
+// ----------------------------------------
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -22,16 +36,22 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 💡 Business App QR ප්‍රශ්නය සහ Session අවුල් හැඬල් කිරීමට හදපු Client එක
+// 💡 Business App QR ප්‍රශ්නය සහ Timeout අවුල් හැඬල් කිරීමට හදපු Client එක
 const client = new Client({
     authStrategy: new LocalAuth({ clientId: 'akiya-business-session-1' }), 
+    authTimeoutMs: 120000, // 💡 ලොග් වෙන්න විනාඩි 2ක් කල් දෙනවා
     puppeteer: {
         headless: true,
+        timeout: 0, // 💡 Page load timeout එක අයින් කළා
+        protocolTimeout: 300000, // 💡 Protocol Timeout එක විනාඩි 5කට වැඩි කළා
         args: [
             '--no-sandbox', 
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage', 
-            '--disable-gpu'
+            '--disable-gpu',
+            '--disable-accelerated-2d-canvas', // 💡 Graphic බර අඩු කළා
+            '--no-first-run',
+            '--no-zygote'
         ]
     }
 });
@@ -156,7 +176,7 @@ client.on('message', async msg => {
             case '9': responseText = `🔹 *CV Creation*\n✔ Modern ATS-friendly designs 📄\n✔ Professional corporate formatting`; imageName = '09.jpeg'; break;
             default: await chat.sendStateTyping(); await client.sendMessage(sender, `⚠️ *කරුණාකර 1️⃣ සිට 9️⃣ දක්වා නිවැරදි අංකයක් පමණක් තෝරන්න.*`); return;
         }
-        responseText += `\n\n📌 *මෙම සේවාව ලබාගැනීමට අවශ්‍යද?*\nකරුණාකර ඔබගේ ArrayList එක පැහැදිලි කර මෙහි ටයිප් කරන්න. අපගේ කණ්ඩායම හැකි ඉක්මනින් ඔබව සම්බන්ධ කරගනු ඇත.\n\n_(ප්‍රධාන මෙනුවට *'Menu'* / ඉවත් වීමට *'00'* යවන්න)_`;
+        responseText += `\n\n📌 *මෙම සේවාව ලබාගැනීමට අවශ්‍යද?*\nකරුණාකර ඔබගේ අවශ්‍යතාවය පැහැදිලි කර මෙහි ටයිප් කරන්න. අපගේ කණ්ඩායම හැකි ඉක්මනින් ඔබව සම්බන්ධ කරගනු ඇත.\n\n_(ප්‍රධාන මෙනුවට *'Menu'* / ඉවත් වීමට *'00'* යවන්න)_`;
         
         await chat.sendStateTyping();
         try {
