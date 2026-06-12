@@ -5,14 +5,14 @@ const { initializeApp } = require('firebase/app');
 const { getDatabase, ref, push, set } = require('firebase/database');
 const path = require('path');
 const Groq = require('groq-sdk');
-const express = require('express'); // 💡 Hugging Face එකට ඕන Web Server එක
+const express = require('express'); 
 
-// --- 🌐 HUGGING FACE WEB SERVER SETUP ---
+// --- 🌐 HUGGING FACE / GITHUB WEB SERVER SETUP ---
 const app_web = express();
 const port = process.env.PORT || 7860;
 
 app_web.get('/', (req, res) => {
-    res.send('✅ AKIYA × DSE Premium AI Bot is Running Successfully on Hugging Face!');
+    res.send('✅ AKIYA × DSE Premium AI Bot is Running Successfully!');
 });
 
 app_web.listen(port, () => {
@@ -36,23 +36,31 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 💡 Business App QR ප්‍රශ්නය සහ Timeout අවුල් හැඬල් කිරීමට හදපු Client එක
+// 💡 100% TIMEOUT & CRASH FIX 
 const client = new Client({
     authStrategy: new LocalAuth({ clientId: 'akiya-business-session-1' }), 
-    authTimeoutMs: 120000, // 💡 ලොග් වෙන්න විනාඩි 2ක් කල් දෙනවා
+    authTimeoutMs: 120000, 
     puppeteer: {
         headless: true,
-        timeout: 0, // 💡 Page load timeout එක අයින් කළා
-        protocolTimeout: 300000, // 💡 Protocol Timeout එක විනාඩි 5කට වැඩි කළා
+        timeout: 0, 
+        protocolTimeout: 0, // 👈 0 දැම්මම ජීවිතේට Time out වෙන්නේ නෑ
         args: [
             '--no-sandbox', 
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage', 
             '--disable-gpu',
-            '--disable-accelerated-2d-canvas', // 💡 Graphic බර අඩු කළා
+            '--disable-accelerated-2d-canvas', 
             '--no-first-run',
-            '--no-zygote'
+            '--no-zygote',
+            '--single-process' // 👈 Free සර්වර් වල RAM එක ඉතුරු කරන්න මේක ගොඩක් උදව් වෙනවා
         ]
+    },
+    // 👈 Windows PC එකක් වගේ පෙනී ඉන්නවා (WhatsApp Block කිරීම නැවැත්වීමට)
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    // 👈 සැහැල්ලු WhatsApp වර්ෂන් එකක් ලෝඩ් කිරීම
+    webVersionCache: {
+        type: 'remote',
+        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
     }
 });
 
@@ -75,7 +83,7 @@ client.on('ready', () => {
 const userStates = {};
 const chatHistories = {};
 
-// 🧠 ADVANCED AI SYSTEM PROMPT (බොට්ගේ මොළය)
+// 🧠 ADVANCED AI SYSTEM PROMPT
 const SYSTEM_PROMPT = `You are an elite, highly intelligent AI assistant named "AKIYA × DSE AI". 
 You represent two premium brands: "AKIYA OFFICIAL" and "DARK SOUL EMPIRE (DSE)".
 Founder & Owner: AKHILA SANDARUWAN.
@@ -99,7 +107,6 @@ client.on('message', async msg => {
 
     await chat.sendSeen();
 
-    // 🔴 EXIT MESSAGE
     if (text === '00' || text === 'exit') {
         userStates[sender] = 'EXITED'; 
         delete chatHistories[sender]; 
@@ -108,7 +115,6 @@ client.on('message', async msg => {
         return;
     }
 
-    // 🟢 MAIN MENU
     if (text === 'hi' || text === 'hello' || text === 'menu') {
         userStates[sender] = 'MAIN_MENU';
         await chat.sendStateTyping();
@@ -120,7 +126,6 @@ client.on('message', async msg => {
         return;
     } 
 
-    // 🟡 MENU SELECTIONS
     if (userStates[sender] === 'MAIN_MENU') {
         await chat.sendStateTyping();
         if (text === '1') {
@@ -141,15 +146,14 @@ client.on('message', async msg => {
         return;
     }
 
-    // 🤖 AI CHAT (Llama 3.3 70B - සුපිරිම මොඩල් එක)
     if (userStates[sender] === 'AI_CHAT') {
         try {
             await chat.sendStateTyping(); 
             chatHistories[sender].push({ role: "user", content: msg.body });
             const completion = await groq.chat.completions.create({
                 messages: chatHistories[sender],
-                model: "llama-3.3-70b-versatile", // 👈 Groq එකේ තියෙන හොඳම මොඩල් එක
-                temperature: 0.2 // 👈 පිස්සු කියවන්නේ නැති වෙන්න පාලනය කර ඇත
+                model: "llama-3.3-70b-versatile", 
+                temperature: 0.2 
             });
             const aiResponse = completion.choices[0]?.message?.content || "සමාවන්න, මට එය තේරුම් ගත නොහැක.";
             chatHistories[sender].push({ role: "assistant", content: aiResponse });
@@ -161,7 +165,6 @@ client.on('message', async msg => {
         return;
     }
 
-    // 🎨 AKIYA MENU LOGIC
     if (userStates[sender] === 'AKIYA_MENU') {
         let responseText = ''; let imageName = '';     
         switch(text) {
@@ -186,7 +189,6 @@ client.on('message', async msg => {
         return;
     }
 
-    // 💻 DARK SOUL MENU LOGIC
     if (userStates[sender] === 'DARK_SOUL_MENU') {
         let responseText = ''; let imageName = '';
         switch(text) {
